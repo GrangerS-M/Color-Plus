@@ -4,21 +4,29 @@ using UnityEngine;
 
 public class Controller : MonoBehaviour {
 
-	//I worked on this programming together with Zofia
+	//I worked on this programming with Zofia
 
 	public GameObject cubePreFab;
 	Vector3 cubePosition;
 	GameObject [,] grid;
+	GameObject nextCube;
 	int gridX, gridY;
 	float gameLength = 60;
 	float turnLength = 2.0f;
 	int turns;
 	int nextCubeX, nextCubeY;
+	Color[] cubeColors = { Color.blue, Color.red, Color.green, Color.yellow, Color.magenta };
+	int playerScore;
+	int sameColorPoints = 10;
+	int allColorPoints = 5;
 
 
-	//spawns a new cube of a random color
+	//spawns a new cube of a random color every turn
 	void SpawnNextCube () {
-		Instantiate (cubePreFab, new Vector3 (nextCubeX, nextCubeY, 0), Quaternion.identity);
+		if (nextCube == null) {
+			nextCube = Instantiate (cubePreFab, new Vector3 (nextCubeX, nextCubeY, 0), Quaternion.identity);
+		}
+		nextCube.GetComponent<Renderer> ().material.color = cubeColors [Random.Range (0, cubeColors.Length)];
 
 	}
 
@@ -26,8 +34,14 @@ public class Controller : MonoBehaviour {
 	//
 	//	}
 
-	void EndGame (){
-
+	void EndGame (bool win){
+		//make all other processes stop, thereby ending the game
+		print ("Game Over");
+		if (win == false) {
+			print ("You Lost");
+		} else {
+			print ("Your final score is: " + playerScore);
+		}
 	}
 
 	//	int[] FindEmptySpace (){
@@ -35,11 +49,15 @@ public class Controller : MonoBehaviour {
 	//	}
 
 	void ScoreSameColorPlus () {
-
+		//add sameColorPoints to playerScore
+		playerScore = playerScore + sameColorPoints;
+		//turn cubes in plus black and deactivate them
 	}
 
 	void ScoreAllColorPlus () {
-
+		//add allColorPoints to playerScore
+		playerScore = playerScore + allColorPoints;
+		//turn cubes in plus black and deactivate them
 	}
 
 	void ProcessClick (GameObject clickedCube, int x, int y) {
@@ -50,10 +68,57 @@ public class Controller : MonoBehaviour {
 
 	}
 
+	int FindAvailableCube (int x){
+		//find random open space in row selected
+		//if there are no open spaces, return -1
+
+		//placeholder
+		return 1;
+	}
+
+	void PlaceCube (int x){
+		int y = FindAvailableCube (x);
+		if (y == -1) {
+			EndGame (false);
+		}
+		else {
+			//place colored cube in random open space
+		}
+	}
+
+	void SpawnBlackCube(){
+		//find a random empty space to place a black cube
+		//if no empty spaces are availabele, end the game
+	}
 
 	//checks for keyboard inputs
 	void ProcessKeyboard (){
+		int rowNum = 0;
+
 		//check for 1-5
+		if (Input.GetKeyDown (KeyCode.Alpha1)) {
+			rowNum = 1;
+		}
+
+		if (Input.GetKeyDown (KeyCode.Alpha2)) {
+			rowNum = 2;
+		}
+
+		if (Input.GetKeyDown (KeyCode.Alpha3)) {
+			rowNum = 3;
+		}
+
+		if (Input.GetKeyDown (KeyCode.Alpha4)) {
+			rowNum = 4;
+		}
+
+		if (Input.GetKeyDown (KeyCode.Alpha5)) {
+			rowNum = 5;
+		}
+			
+		if (nextCube != null && rowNum > 0) {
+			PlaceCube (rowNum - 1);
+		}
 		//if 1-5 input, checks for empty space in that row
 		//change cube color from white to color of current "next cube"
 		//removes cube considered "next cube"
@@ -65,6 +130,8 @@ public class Controller : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		playerScore = 0;
 
 		turns = 0;
 		gridX = 8;
@@ -87,14 +154,19 @@ public class Controller : MonoBehaviour {
 	void Update () {
 
 		ProcessKeyboard ();
-		ScoreSameColorPlus ();
-		ScoreAllColorPlus ();
+
+//		if (cubes of the same color are in a plus){
+//			ScoreSameColorPlus ();
+//	}
+//		if (cube of all different colors are in a plus){
+//			ScoreAllColorPlus ();
+//	}
 
 
 		//If the timer is up, end the game
 		if (Time.time > gameLength) {
 
-			EndGame ();
+			EndGame (true);
 		}
 
 		//a turn happens every turnLength seconds
@@ -111,6 +183,9 @@ public class Controller : MonoBehaviour {
 
 			SpawnNextCube ();
 		}
+
+		//if a plus is made of all five colors, start ScoreAllColorPlus
+		//if a plus is made of one single color, start ScoreSameColorPlus
 
 	}
 }
